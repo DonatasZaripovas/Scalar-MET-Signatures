@@ -16,8 +16,10 @@ doMG5    = [ True, "Semileptonic", "Pythia8" ]
 doRivet  = True
 
 # Change as appropriate
-MG5Path   = "/home/donatas/ppt_local/MG5_aMC_v2_6_0/run"
+MG5Path   = "/home/donatas/ppt_local/run_mg5"
 rivetPath = "/home/donatas/ppt_local/run_rivet"
+if not os.path.exists(MG5Path):
+    os.makedirs(MG5Path)
 
 Models = ["L10_1_kin_mass_SM", "L10_3_kin_mass_SM", "L10_4_kin_mass_SM", "L10_2_kin_mass_SM"]
 Models = ["L10_1_kin_mass_SM"]
@@ -58,7 +60,7 @@ if doMG5[0]:
 										"shower = "    + _shower  + '\n' \
 										"0\n" \
 										"set use_syst False\n" \
-										+MG5Path+"/Modified_cards/pythia8_card.dat\n" \
+										+MG5Path+"/Pythia8_cards/pythia8_card.dat\n" \
 										"0\n")
 		MG5Script.close()
 		os.system("mg5 mg5runscript.mg5")
