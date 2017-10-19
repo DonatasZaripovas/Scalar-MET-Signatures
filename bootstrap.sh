@@ -29,27 +29,28 @@ if ! [ -x "$(command -v mg5)" ]; then
 	printf "${WARN}..MadGraph not detected!..${ENDC}\n"
 	if ! [ -d "${PWD}/MG5_aMC_v2_6_0" ]; then
 		printf "${GREEN}..Downloading MadGraph2.6.0...${ENDC}\n"
-		wget http://launchpad.net/madgraph5/2.0/2.6.x/+download/MG5_aMC_v2.6.0.tar.gz
+		wget http://launchpad.net/madgraph5/2.0/2.6.x/+download/MG5_aMC_v2.6.0.tar.gz > /dev/null 2>&1
 		tar -xf MG5_aMC_v2.6.0.tar.gz
 		rm MG5_aMC_v2.6.0.tar.gz
 	fi
 	export PATH="$PATH:${PWD}/MG5_aMC_v2_6_0/bin"
-	printf "${GREEN}..Added MadGraph to PATH!...${ENDC}\n"
+	printf "${GREEN}..Added MadGraph to PATH...${ENDC}\n"
 	work_env_activated=false
 else
 	printf "${GREEN}..MadGraph detected...${ENDC}\n"
+	
 fi
 
 if ! [ -x "$(command -v rivet)" ]; then
 	printf "${WARN}..Rivet not detected!..${ENDC}\n"
 	if ! [ -d "${PWD}/Rivet-2.5.4" ]; then
 		printf "${GREEN}..Downloading Rivet-2.5.4...${ENDC}\n"
-		wget http://www.hepforge.org/archive/rivet/Rivet-2.5.4.tar.gz
+		wget http://www.hepforge.org/archive/rivet/Rivet-2.5.4.tar.gz > /dev/null 2>&1
 		tar -xf Rivet-2.5.4.tar.gz
 		rm Rivet-2.5.4.tar.gz
 	fi
 	export PATH="$PATH:${PWD}/Rivet-2.5.4/bin"
-	printf "${GREEN}..Added Rivet to PATH!...${ENDC}\n"
+	printf "${GREEN}..Added Rivet to PATH...${ENDC}\n"
 	work_env_activated=false
 else
 	printf "${GREEN}..Rivet detected...${ENDC}\n"
@@ -67,3 +68,5 @@ fi
 if [ -n "${BASH-}" -o -n "${ZSH_VERSION-}" ] ; then
 	hash -r 2>/dev/null
 fi
+
+
