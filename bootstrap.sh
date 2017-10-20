@@ -53,14 +53,25 @@ fi
 
 if ! [ -x "$(command -v rivet)" ]; then
 	printf "${WARN}..Rivet not detected!..${ENDC}\n"
-	if ! [ -d "${PWD}/Rivet-2.5.4" ]; then
-		printf "${GREEN}..Downloading Rivet-2.5.4...${ENDC}\n"
-		wget http://www.hepforge.org/archive/rivet/Rivet-2.5.4.tar.gz > /dev/null 2>&1
-		tar -xf Rivet-2.5.4.tar.gz
-		rm Rivet-2.5.4.tar.gz
+	if [ -f $PWD/local/bin/rivet ]; then
+		print "${GREEN}..Phew..Found it !..${ENDC}"
+		source "$PWD/local/rivetenv.sh"
+		printf "${GREEN}..Added Rivet to PATH...${ENDC}\n"
 	fi
-	export PATH="$PATH:${PWD}/Rivet-2.5.4/bin"
-	printf "${GREEN}..Added Rivet to PATH...${ENDC}\n"
+	else
+		printf "${WARN}..Would you like to install Rivet? The installation might take a while and will install GSL, HEPMC, FASTJET, YODA and RIVET if not found locally. \n All packages will by default be installed in $PWD/local/ . Type '"'n'"' if you would rather do it yourself. ${ENDC}\n"
+		read -p "..(y/n)?..." -n 1 -r
+		echo
+		if [[ $REPLY =~ ^[Yy]$ ]]; then
+			printf "${GREEN}..Continuing with Rivet installation..This may take a while!..${ENDC}\n"
+			wget http://rivet.hepforge.org/hg/bootstrap/raw-file/2.5.4/rivet-bootstrap
+			source rivet-bootstrap
+			source "$PWD/local/rivetenv.sh"
+			printf "${GREEN}..Added Rivet to PATH...${ENDC}\n"
+		else
+			printf "${WARN}..Skipping installation of Rivet! Please resolve this yourself or rerun the bootstrap for automatic installation.${ENDC}\n"
+			work_env_activated=false
+		fi
 	work_env_activated=true
 else
 	printf "${GREEN}..Rivet detected in...${ENDC}\n"
@@ -80,7 +91,7 @@ if [ ! -d "${MG5ExePath%bin*}"/HEPTools/pythia8/ ]; then
 		mg5 pythia_install.mg5
 		cd -
 	else
-		printf "${WARN}..Skipping installation of Pythia8! Please resolve this yourself of rerun the bootstrap for automatic installation.${ENDC}\n"
+		printf "${WARN}..Skipping installation of Pythia8! Please resolve this yourself or rerun the bootstrap for automatic installation.${ENDC}\n"
 		work_env_activated=false
 	fi
 fi
