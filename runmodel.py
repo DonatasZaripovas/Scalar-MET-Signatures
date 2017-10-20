@@ -14,8 +14,8 @@ doMG5    = [ True, "Semileptonic", "Pythia8" ]
 doRivet  = False
 
 # Change as appropriate
-MG5Path   = None
-rivetPath = None
+MG5Path   = os.getcwd()+"/run_mg5"
+rivetPath = os.getcwd()+"/run_rivet"
 #print MG5Path
 #print rivetPath
 if not os.path.exists(MG5Path):

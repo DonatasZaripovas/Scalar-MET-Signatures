@@ -37,8 +37,11 @@ if ! [ -x "$(command -v mg5)" ]; then
 	printf "${GREEN}..Added MadGraph to PATH...${ENDC}\n"
 	work_env_activated=false
 else
-	printf "${GREEN}..MadGraph detected...${ENDC}\n"
-	
+	printf "${GREEN}..MadGraph detected in...${ENDC}\n"
+	MG5ExePath=`which mg5`
+	echo $MG5ExePath
+	sed '/^[ \t]*MG5Path/ s:None:"'$MG5ExePath'":g' runmodel.py > tempfile.txt
+	mv tempfile.txt runmodel.py
 fi
 
 if ! [ -x "$(command -v rivet)" ]; then
@@ -53,7 +56,11 @@ if ! [ -x "$(command -v rivet)" ]; then
 	printf "${GREEN}..Added Rivet to PATH...${ENDC}\n"
 	work_env_activated=false
 else
-	printf "${GREEN}..Rivet detected...${ENDC}\n"
+	printf "${GREEN}..Rivet detected in...${ENDC}\n"
+	RivetExePath=`which rivet`
+	echo $RivetExePath
+	sed '/^[ \t]*rivetPath/ s:None:"'$RivetExePath'":g' runmodel.py > tempfile.txt
+	mv tempfile.txt runmodel.py
 fi
 
 if [ "$work_env_activated" = false ]; then
