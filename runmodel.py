@@ -57,7 +57,7 @@ if doMG5[0]:
 										"generate p p > t t~ "    + _process + " " + _finalState + '\n' \
 										"output PROC_" + model    + '\n' \
 									  "launch PROC_" + model    + '\n' \
-										"shower = "    + _shower  + '\n' \
+										"shower="    + _shower  + '\n' \
 										"0\n" \
 										"set use_syst False\n" \
 										+MG5Path+"/Pythia8_cards/pythia8_card.dat\n" \
