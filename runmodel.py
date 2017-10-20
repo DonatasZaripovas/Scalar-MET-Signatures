@@ -2,8 +2,6 @@
 
 import os
 
-os.system("source /home/donatas/ppt_local/bin/activate")
-
 WARN  = '\033[93m'
 GREEN = '\033[92m'
 ENDC  = '\033[0m'
@@ -16,8 +14,10 @@ doMG5    = [ True, "Semileptonic", "Pythia8" ]
 doRivet  = False
 
 # Change as appropriate
-MG5Path   = os.getcwd()+"/run_mg5"
-rivetPath = os.getcwd()+"/run_rivet"
+MG5Path   = None
+rivetPath = None
+#print MG5Path
+#print rivetPath
 if not os.path.exists(MG5Path):
     os.makedirs(MG5Path)
 
@@ -63,7 +63,7 @@ if doMG5[0]:
 										+MG5Path+"/Pythia8_cards/pythia8_card.dat\n" \
 										"0\n")
 		MG5Script.close()
-		os.system(MG5Path+"/bin/mg5 mg5runscript.mg5")
+		os.system("mg5 mg5runscript.mg5")
 		os.chdir(MG5Path + "/PROC_" + model + "/Events/run_01")
 		print GREEN+"..Extracting Pythia output..."+ENDC
 		os.system("gunzip -k tag_1_pythia8_events.hepmc.gz")
@@ -73,5 +73,5 @@ if doRivet:
 	os.chdir(rivetPath)
 	os.system('export RIVET_ANALYSIS_PATH=rivetPath')
 	for model in Models:
-		os.system(rivetPath+"/bin/rivet --analysis=Missing_momentum "+MG5Path+"/PROC_"+model+"/Events/run_01/tag_1_pythia8_events.hepmc -o PROC_"+model+".yoda")
+		os.system("rivet --analysis=Missing_momentum "+MG5Path+"/PROC_"+model+"/Events/run_01/tag_1_pythia8_events.hepmc -o PROC_"+model+".yoda")
 
