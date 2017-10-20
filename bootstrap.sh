@@ -4,6 +4,8 @@ GREEN='\033[0;32m'
 WARN='\033[0;33m'
 ENDC='\033[0m'
 
+work_env_activated=false
+
 printf "${GREEN}..Checking OS...${ENDC}\n"
 platform='unknown'
 unamestr=`uname`
@@ -35,11 +37,18 @@ if ! [ -x "$(command -v mg5)" ]; then
 	fi
 	export PATH="$PATH:${PWD}/MG5_aMC_v2_6_0/bin"
 	printf "${GREEN}..Added MadGraph to PATH...${ENDC}\n"
-	work_env_activated=false
+	MG5ExePath=`which mg5`
+	work_env_activated=true
 else
 	printf "${GREEN}..MadGraph detected in...${ENDC}\n"
 	MG5ExePath=`which mg5`
 	echo $MG5ExePath
+fi
+
+# If example_ufo is not in the model directory of MG5, put it there.
+if [ ! -d "${MG5ExePath%bin*}"/models/L10_1_kin_mass_SM ]; then
+	printf "${GREEN}..Copying Example_UFO to MadGraph model folder...${ENDC}\n"
+	cp -r Example_UFO/L10_1_kin_mass_SM "${MG5ExePath%bin*}"/models/
 fi
 
 if ! [ -x "$(command -v rivet)" ]; then
@@ -52,17 +61,34 @@ if ! [ -x "$(command -v rivet)" ]; then
 	fi
 	export PATH="$PATH:${PWD}/Rivet-2.5.4/bin"
 	printf "${GREEN}..Added Rivet to PATH...${ENDC}\n"
-	work_env_activated=false
+	work_env_activated=true
 else
 	printf "${GREEN}..Rivet detected in...${ENDC}\n"
 	RivetExePath=`which rivet`
 	echo $RivetExePath
 fi
 
-if [ "$work_env_activated" = false ]; then
+# If pythia8 not integrated with MG5 then download and install interface
+if [ ! -d "${MG5ExePath%bin*}"/HEPTools/pythia8/ ]; then
+	printf "${WARN}..Pythia8 interface with MG5 not detected, please let me install...Continue?${ENDC}\n"
+	read -p "..(y/n)?..." -n 1 -r
+	echo
+	if [[ $REPLY =~ ^[Yy]$ ]]; then
+		printf "${GREEN}..Continuing with pythia8 integration, this may take a while!..${ENDC}\n"
+		echo "install pythia8" > $PWD/run_mg5/pythia_install.mg5
+		cd $PWD/run_mg5
+		mg5 pythia_install.mg5
+		cd -
+	else
+		printf "${WARN}..Skipping installation of Pythia8! Please resolve this yourself of rerun the bootstrap for automatic installation.${ENDC}\n"
+		work_env_activated=false
+	fi
+fi
+
+if [ "$work_env_activated" = true ]; then
 	PS1="(X)$PS1"
 	export PS1
-	work_env_activated=true
+	work_env_activated=false
 fi
 
 # This should detect bash abd zsh, which have a hash command that must
@@ -71,5 +97,3 @@ fi
 if [ -n "${BASH-}" -o -n "${ZSH_VERSION-}" ] ; then
 	hash -r 2>/dev/null
 fi
-
-

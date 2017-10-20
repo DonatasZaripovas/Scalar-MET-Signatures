@@ -21,7 +21,7 @@ rivetPath = os.getcwd()+"/run_rivet"
 if not os.path.exists(MG5Path):
     os.makedirs(MG5Path)
 
-Models = ["L10_1_kin_mass_SM", "L10_3_kin_mass_SM", "L10_4_kin_mass_SM", "L10_2_kin_mass_SM"]
+# The included example model
 Models = ["L10_1_kin_mass_SM"]
 
 if doMG5[0]:
