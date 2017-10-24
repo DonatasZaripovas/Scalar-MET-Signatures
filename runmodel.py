@@ -11,7 +11,7 @@ ENDC  = '\033[0m'
 #					top-decay: "Hadronic", "Semileptonic", "Leptonic", "".
 #					shower	 : "Pythia8" , "OFF".
 doMG5    = [ True, "Semileptonic", "Pythia8" ]
-doRivet  = False
+doRivet  = True
 
 # Change as appropriate
 MG5Path   = os.getcwd()+"/run_mg5"
@@ -59,6 +59,9 @@ if doMG5[0]:
 									  "launch PROC_" + model    + '\n' \
 										"shower="    + _shower  + '\n' \
 										"0\n" \
+										"set ickkw 1\n" \
+										"set maxjetflavor 5\n" \
+										"set ktdurham 1\n" \
 										"set use_syst False\n" \
 										+MG5Path+"/Pythia8_cards/pythia8_card.dat\n" \
 										"0\n")
