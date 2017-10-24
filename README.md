@@ -1,5 +1,4 @@
 # Scalar-MET-Signatures
-# From scalar models to pheno signatures
 
 # First time setup
 
