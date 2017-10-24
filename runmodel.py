@@ -10,7 +10,7 @@ ENDC  = '\033[0m'
 # Options:
 #					top-decay: "Hadronic", "Semileptonic", "Leptonic", "".
 #					shower	 : "Pythia8" , "OFF".
-doMG5    = [ True, "Semileptonic", "Pythia8" ]
+doMG5    = [ False, "Semileptonic", "Pythia8" ]
 doRivet  = True
 
 # Change as appropriate
@@ -74,7 +74,8 @@ if doMG5[0]:
 if doRivet:
 	print GREEN+"..Running Rivet Analysis..."+ENDC
 	os.chdir(rivetPath)
-	os.system('export RIVET_ANALYSIS_PATH=rivetPath')
+	# os.system("export RIVET_ANALYSIS_PATH=$PWD")
+	os.system("rivet-buildplugin Rivet_Missing_momentum.so Missing_momentum.cc")
 	for model in Models:
 		os.system("rivet --analysis=Missing_momentum "+MG5Path+"/PROC_"+model+"/Events/run_01/tag_1_pythia8_events.hepmc -o PROC_"+model+".yoda")
-
+	print "Now run rivet-mkhtml <file1.yoda>:'Name this file' <file2.yoda>:'Name the second file'  etc..."

@@ -95,6 +95,11 @@ else
 	echo $RivetExePath
 fi
 
+if [ -d $PWD/run_rivet ]; then
+	echo "adding to path"
+	export RIVET_ANALYSIS_PATH=$PWD/run_rivet
+fi
+
 # If pythia8 not integrated with MG5 then download and install interface
 if [ ! -d "${MG5ExePath%bin*}"/HEPTools/pythia8/ ]; then
 	printf "${WARN}..Pythia8 interface with MG5 not detected, please let me install...Continue?${ENDC}\n"
