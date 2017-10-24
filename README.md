@@ -17,6 +17,9 @@ This should detect if you have a MadGraph software installed and prompt you to i
 Currently tested on MacOS and Linux distributions. If MadGraph is detected, paths are set for the $MG5Path/models/ directory
 for implementing new models. The Example model (inside Example_UFO) is copied to this directory so that mg5 can access it.
 
+The example UFO contains the operator:
+![equation](http://latex.codecogs.com/gif.latex?%5Cmathcal%7BL%7D%3D%5Cfrac%7B%5Cpartial_%7B%5Cmu%7D%5Cphi%5Cpartial%5E%7B%5Cmu%7D%5Cphi%7D%7BM%5E4%7DT%5E%7B%5Cnu%7D_%7B%5Cnu%7D%20&plus;%20%5Cfrac%7B1%7D%7B2%7D%5Cphi%5E%7B2%7Dm%5E%7B2%7D)
+
 Next an interface with Pythia8 should be setup (also prompted), which allows direct .lhe -> .hepmc event shower.
 You can change the Pythia card by passing extra parameters to the runmodel.py python file.
 By default a custom Pythia card is passed (in run_mg5/Pythia8_cards) and Jet matching is turned on.
