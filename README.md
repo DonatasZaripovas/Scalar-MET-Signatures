@@ -23,7 +23,7 @@ for implementing new models. The Example model (inside Example_UFO) is copied to
 
 The example UFO contains the operator:
 
-![equation](http://latex.codecogs.com/gif.latex?%5Cmathcal%7BL%7D%3D%5Cfrac%7B%5Cpartial_%7B%5Cmu%7D%5Cphi%5Cpartial%5E%7B%5Cmu%7D%5Cphi%7D%7BM%5E4%7DT%5E%7B%5Cnu%7D_%7B%5Cnu%7D%20&plus;%20%5Cfrac%7B1%7D%7B2%7D%5Cphi%5E%7B2%7Dm%5E%7B2%7D)
+![equation](http://latex.codecogs.com/gif.latex?%5Cmathcal%7BL%7D_n%3D%5Cleft%28%5Cfrac%7B%5Cphi%7D%7BM%7D%5Cright%29%5EnT%5E%7B%5Cnu%7D_%7B%5Cnu%7D%7E%7Ewith%7E%7En%3D1)
 
 Next an interface with Pythia8 should be setup (also prompted), which allows direct .lhe -> .hepmc event shower.
 You can change the Pythia card by passing extra parameters to the runmodel.py python file.
