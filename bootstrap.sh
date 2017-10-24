@@ -35,7 +35,6 @@ if ! [ -x "$(command -v mg5)" ]; then
 		if [[ $REPLY =~ ^[Yy]$ ]]; then
 			printf "${GREEN}..Downloading MadGraph2.6.0...${ENDC}\n"
 			curl --http1.1 http://launchpad.net/madgraph5/2.0/2.6.x/+download/MG5_aMC_v2.6.0.tar.gz --output MG5_aMC_v2.6.0.tar.gz
-			# wget http://launchpad.net/madgraph5/2.0/2.6.x/+download/MG5_aMC_v2.6.0.tar.gz > /dev/null 2>&1
 			curl -LO http://launchpad.net/madgraph5/2.0/2.6.x/+download/MG5_aMC_v2.6.0.tar.gz
 			tar -xf MG5_aMC_v2.6.0.tar.gz
 			rm MG5_aMC_v2.6.0.tar.gz
@@ -79,7 +78,7 @@ if ! [ -x "$(command -v rivet)" ]; then
 		if [[ $REPLY =~ ^[Yy]$ ]]; then
 			printf "${GREEN}..Continuing with Rivet installation..This may take a while!..${ENDC}\n"
 			if ! [ -f $PWD/rivet-bootstrap ]; then
-				wget http://rivet.hepforge.org/hg/bootstrap/raw-file/2.5.4/rivet-bootstrap
+				curl -LO http://rivet.hepforge.org/hg/bootstrap/raw-file/2.5.4/rivet-bootstrap
 			fi
 			
 			export YODA_CONFFLAGS=--enable-root=no
