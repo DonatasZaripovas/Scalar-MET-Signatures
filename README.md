@@ -44,4 +44,30 @@ doRivet = True
 ```
 in runmodel.py file. Analysis currently does per-event analysis, lepton isolation, tau jet rejection and outputs a few observables (more to be added).
 
+# Running the tool-chain
+*OPTIONAL*
+Once setup, simply running 
+```
+python runmodel.py
+```
+should go through the steps of adding the model to MG5, showering and doing per-event analysis in rivet.
+*Otherwise can perform analysis manually*
+```
+cd run_mg5/
+mg5
+import model L10_1_kin_mass_SM # or other
+generate p p > t t~, (t > b w+, w+ > j j), (t~ > b~ w-, w- > l- vl~)
+output <model_output_filename>
+launch <model_output_filename>
+shower=Pythia8
+0
+set ickkw 1
+set maxjetflavor 5 # perhaps doesn't matter, but I think easier for b-tagging?
+set ktdurham 1 # matching algo
+set use_syst False
+/path/to/pythia8_card.dat # for stable b's
+0
+```
+and waitt...
+
 # UFO -> .hepmc -> plots!
