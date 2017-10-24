@@ -34,7 +34,9 @@ if ! [ -x "$(command -v mg5)" ]; then
 		read -p "..(y/n)?..." -n 1 -r
 		if [[ $REPLY =~ ^[Yy]$ ]]; then
 			printf "${GREEN}..Downloading MadGraph2.6.0...${ENDC}\n"
-			wget http://launchpad.net/madgraph5/2.0/2.6.x/+download/MG5_aMC_v2.6.0.tar.gz > /dev/null 2>&1
+			curl --http1.1 http://launchpad.net/madgraph5/2.0/2.6.x/+download/MG5_aMC_v2.6.0.tar.gz --output MG5_aMC_v2.6.0.tar.gz
+			# wget http://launchpad.net/madgraph5/2.0/2.6.x/+download/MG5_aMC_v2.6.0.tar.gz > /dev/null 2>&1
+			curl -LO http://launchpad.net/madgraph5/2.0/2.6.x/+download/MG5_aMC_v2.6.0.tar.gz
 			tar -xf MG5_aMC_v2.6.0.tar.gz
 			rm MG5_aMC_v2.6.0.tar.gz
 			export PATH="$PATH:${PWD}/MG5_aMC_v2_6_0/bin"
@@ -96,7 +98,6 @@ else
 fi
 
 if [ -d $PWD/run_rivet ]; then
-	echo "adding to path"
 	export RIVET_ANALYSIS_PATH=$PWD/run_rivet
 fi
 
