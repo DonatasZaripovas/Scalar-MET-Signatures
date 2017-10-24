@@ -12,6 +12,11 @@ Now to get the relevant packages run
 ```
 source bootstrap.sh
 ```
+NOTE: This should be run everytime after exiting the shell. It sets up the relevant paths to mg5/rivet/pythia.
+If workspace is enabled successfully, you should see an (X) mark next to your shell prompt marker, i.e. 
+```
+(X)donatas@hopper:~/test_package/Scalar-MET-Signatures$
+```
 # Bootstrap explanation
 This should detect if you have a MadGraph software installed and prompt you to install it if you do not have it.
 Currently tested on MacOS and Linux distributions. If MadGraph is detected, paths are set for the $MG5Path/models/ directory
