@@ -30,15 +30,27 @@ if ! [ -x "$(command -v mg5)" ]; then
 	
 	printf "${WARN}..MadGraph not detected!..${ENDC}\n"
 	if ! [ -d "${PWD}/MG5_aMC_v2_6_0" ]; then
-		printf "${GREEN}..Downloading MadGraph2.6.0...${ENDC}\n"
-		wget http://launchpad.net/madgraph5/2.0/2.6.x/+download/MG5_aMC_v2.6.0.tar.gz > /dev/null 2>&1
-		tar -xf MG5_aMC_v2.6.0.tar.gz
-		rm MG5_aMC_v2.6.0.tar.gz
+		printf "${WARN}..Would you like to install MadGraph2.6.0? ${ENDC}\n"
+		read -p "..(y/n)?..." -n 1 -r
+		if [[ $REPLY =~ ^[Yy]$ ]]; then
+			printf "${GREEN}..Downloading MadGraph2.6.0...${ENDC}\n"
+			wget http://launchpad.net/madgraph5/2.0/2.6.x/+download/MG5_aMC_v2.6.0.tar.gz > /dev/null 2>&1
+			tar -xf MG5_aMC_v2.6.0.tar.gz
+			rm MG5_aMC_v2.6.0.tar.gz
+			export PATH="$PATH:${PWD}/MG5_aMC_v2_6_0/bin"
+			printf "${GREEN}..Added MadGraph to PATH...${ENDC}\n"
+			MG5ExePath=`which mg5`
+			work_env_activated=true
+		else
+			printf "${WARN}..Skipping installation of MadGraph! Please resolve this yourself or rerun the bootstrap for automatic installation.${ENDC}\n"
+			work_env_activated=false
+		fi
+	else	
+		export PATH="$PATH:${PWD}/MG5_aMC_v2_6_0/bin"
+		printf "${GREEN}..Added MadGraph to PATH...${ENDC}\n"
+		MG5ExePath=`which mg5`
+		work_env_activated=true
 	fi
-	export PATH="$PATH:${PWD}/MG5_aMC_v2_6_0/bin"
-	printf "${GREEN}..Added MadGraph to PATH...${ENDC}\n"
-	MG5ExePath=`which mg5`
-	work_env_activated=true
 else
 	printf "${GREEN}..MadGraph detected in...${ENDC}\n"
 	MG5ExePath=`which mg5`
@@ -54,17 +66,21 @@ fi
 if ! [ -x "$(command -v rivet)" ]; then
 	printf "${WARN}..Rivet not detected!..${ENDC}\n"
 	if [ -f $PWD/local/bin/rivet ]; then
-		print "${GREEN}..Phew..Found it !..${ENDC}"
+		printf "${GREEN}..Phew..Found it !..${ENDC}\n"
 		source "$PWD/local/rivetenv.sh"
 		printf "${GREEN}..Added Rivet to PATH...${ENDC}\n"
-	fi
+		work_env_activated=true
 	else
 		printf "${WARN}..Would you like to install Rivet? The installation might take a while and will install GSL, HEPMC, FASTJET, YODA and RIVET if not found locally. \n All packages will by default be installed in $PWD/local/ . Type '"'n'"' if you would rather do it yourself. ${ENDC}\n"
 		read -p "..(y/n)?..." -n 1 -r
 		echo
 		if [[ $REPLY =~ ^[Yy]$ ]]; then
 			printf "${GREEN}..Continuing with Rivet installation..This may take a while!..${ENDC}\n"
-			wget http://rivet.hepforge.org/hg/bootstrap/raw-file/2.5.4/rivet-bootstrap
+			if ! [ -f $PWD/rivet-bootstrap ]; then
+				wget http://rivet.hepforge.org/hg/bootstrap/raw-file/2.5.4/rivet-bootstrap
+			fi
+			
+			export YODA_CONFFLAGS=--enable-root=no
 			source rivet-bootstrap
 			source "$PWD/local/rivetenv.sh"
 			printf "${GREEN}..Added Rivet to PATH...${ENDC}\n"
@@ -72,7 +88,7 @@ if ! [ -x "$(command -v rivet)" ]; then
 			printf "${WARN}..Skipping installation of Rivet! Please resolve this yourself or rerun the bootstrap for automatic installation.${ENDC}\n"
 			work_env_activated=false
 		fi
-	work_env_activated=true
+	fi
 else
 	printf "${GREEN}..Rivet detected in...${ENDC}\n"
 	RivetExePath=`which rivet`
