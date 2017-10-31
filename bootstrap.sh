@@ -81,8 +81,9 @@ if ! [ -x "$(command -v rivet)" ]; then
 				curl -LO http://rivet.hepforge.org/hg/bootstrap/raw-file/2.5.4/rivet-bootstrap
 			fi
 			
+			chmod +x rivet-bootstrap
 			export YODA_CONFFLAGS=--enable-root=no
-			source rivet-bootstrap
+			./rivet-bootstrap
 			source "$PWD/local/rivetenv.sh"
 			printf "${GREEN}..Added Rivet to PATH...${ENDC}\n"
 		else
