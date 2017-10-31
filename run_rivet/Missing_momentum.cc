@@ -107,8 +107,7 @@ namespace Rivet {
 						_hist_dR_x0_j->fill(dR, weight);
 					}
 				}
-	
-/*
+
 				// get the candidate jets
 				Jets cand_jets;
 				foreach ( const Jet& jet, applyProjection<FastJets>(event, "AntiKtJets04").jetsByPt(30.0*GeV) ) {
@@ -145,11 +144,6 @@ namespace Rivet {
 					cand_mu.push_back(mu);
 				}
 
-
-				// veto events with leptons
-				//if( ! cand_e.empty() || ! cand_mu.empty() )
-				//vetoEvent;
-
 				// discard jets that overlap with electrons
 				Jets recon_jets;
 				foreach ( const Jet& jet, cand_jets ) {
@@ -179,10 +173,10 @@ namespace Rivet {
 					double mT = 2.*recon_jets[ix].perp()*ETmiss
 						-recon_jets[ix].px()*pTmiss.px()
 						-recon_jets[ix].py()*pTmiss.py();
+					std::cout << mT << " The MT cut" << std::endl;
 					if (mT<100.) continue; //vetoEvent;
 				}
 
-*/
 				_hist_ETmiss->fill(ETmiss/GeV, weight);
 				_hist_met->fill(met.vectorEt().mod()/GeV);
 			}
