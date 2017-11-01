@@ -7,12 +7,22 @@ GREEN = '\033[92m'
 ENDC  = '\033[0m'
 
 # Usage:   [ doIf, "top-decay"   , "shower" ]
-# Options:
-#					top-decay: "Hadronic", "Semileptonic", "Leptonic", "".
-#					shower	 : "Pythia8" , "OFF".
+####################################################### Options:
+#top-decay: "Hadronic", "Semileptonic", "Leptonic", "".
+#shower	 : "Pythia8" , "OFF".
 doMG5    = [ True, "Semileptonic", "Pythia8" ]
+doMatching = True
 doRivet  = True
 
+# The included example model
+#Models = ["L10_1_kin_mass_SM"]
+Models = ["sm-full"]
+
+# can produce extra scalars if model allows, i.e. for L10_4 make extraScalars = "x0 x0 x0 x0"
+# if not allowed leave blank, i.e. extraScalars = ""
+extraScalars = ""
+
+###################################### RUN CARDS AND RUNS #########################
 # Change as appropriate
 MG5Path   = os.getcwd()+"/run_mg5"
 rivetPath = os.getcwd()+"/run_rivet"
@@ -20,10 +30,6 @@ rivetPath = os.getcwd()+"/run_rivet"
 #print rivetPath
 if not os.path.exists(MG5Path):
     os.makedirs(MG5Path)
-
-# The included example model
-#Models = ["L10_1_kin_mass_SM"]
-Models = ["sm-full"]
 
 if doMG5[0]:
 	print GREEN+" ..Running MadGraph ..."+ENDC
@@ -49,33 +55,28 @@ if doMG5[0]:
   
 	# Begin model run #########################
 	for model in Models:
-		if "L10" in model:
-			_process = "x0"
-		elif ("L1" in model) or ("L2" in model):
-			_process = "x0 x0"
-		# otherwise don't generate any new scalars. TODO: maybe revise naming convention
-		else:
-			_process = ""
-
 		MG5Script.write("import model " + model    + "\n" \
-										"generate p p > t t~ "        + _process + " " + _finalState + "@0\n" \
-										"add process p p > t t~ j "   + _process + " " + _finalState + "@1\n" \
-										"add process p p > t t~ j j " + _process + " " + _finalState + "@2\n" \
+										"generate p p > t t~ "        + extraScalars + " " + _finalState + "@0\n" \
+										"add process p p > t t~ j "   + extraScalars + " " + _finalState + "@1\n" \
+										"add process p p > t t~ j j " + extraScalars + " " + _finalState + "@2\n" \
 										"output PROC_" + model    + "\n" \
 									  "launch PROC_" + model    + "\n" \
 										"shower="    + _shower  + "\n" \
-										"0\n" \
-										"set ickkw 1\n" \
-										"set maxjetflavor 5\n" \
-										"set ktdurham 1\n" \
-										"set use_syst False\n" \
+										"0\n")
+		# add parameters for jet matching if requested 
+		if doMatching:
+			MG5Script.write("set ickkw 1\n" \
+										  "set maxjetflavor 5\n" \
+											"set ktdurham 1\n")
+		# pythia card and no systematics
+		MG5Script.write("set use_syst False\n" \
 										+MG5Path+"/Pythia8_cards/pythia8_card.dat\n" \
 										"0\n")
 		MG5Script.close()
-		os.system("mg5 mg5runscript.mg5")
-		os.chdir(MG5Path + "/PROC_" + model + "/Events/run_01")
+		#os.system("mg5 mg5runscript.mg5")
+		#os.chdir(MG5Path + "/PROC_" + model + "/Events/run_01")
 		print GREEN+"..Extracting Pythia output..."+ENDC
-		os.system("gunzip -k tag_1_pythia8_events.hepmc.gz")
+		#os.system("gunzip -k tag_1_pythia8_events.hepmc.gz")
 
 if doRivet:
 	print GREEN+"..Running Rivet Analysis..."+ENDC
