@@ -46,6 +46,9 @@ namespace Rivet {
 				addProjection(VisibleFinalState(Cuts::abseta < 4.9), "vfs");
 				addProjection(FinalState(Cuts::abseta < 4.9), "fs");
 
+				// all tracks (to do deltaR with leptons)
+				declare(ChargedFinalState(Cuts::abseta < 3 && Cuts::pT > 0.5*GeV), "cfs");
+
 				// *****************************************************************************
 				// for etmiss
 				const FinalState fs(-4.0, 4.0, 10*GeV);
@@ -57,12 +60,13 @@ namespace Rivet {
 
 
 				// Book histograms
-				_hist_ETmiss  = bookHisto1D("hist_ETmiss", 20 , 0. , 5000.);
-				_hist_met		  = bookHisto1D("hist_met",		20,  0.	,	5000.);
+				_hist_ETmiss  = bookHisto1D("ETmiss", 20 , 0. , 1000.);
+				_hist_met		  = bookHisto1D("met",		20,  0.	,	1000.);
+				_hist_pt_lep  = bookHisto1D("pt_lep", 20,  0., 400.);
 				_hist_n_jet   = bookHisto1D("n-jet", 21, -0.5, 20.5);
 				_hist_phi_jet = bookHisto1D("phi-jet", 50, -PI, PI);
 				_hist_eta_jet = bookHisto1D("eta-jet", 50, -4, 4);
-				_hist_pt_jet  = bookHisto1D("pt-jet", 100, 0.0, 1500);
+				_hist_pt_jet  = bookHisto1D("pt-jet", 100, 0.0, 1000);
 				_hist_dR_x0_j = bookHisto1D("dR-x0-jet", 20, 0.0, 4.0);
 			}
 
@@ -70,19 +74,13 @@ namespace Rivet {
 			void analyze(const Event& event) {
 				const double weight = event.weight();
 
-				/*foreach (const Particle& p, applyProjection<FinalState>(event, "fs").particles()){
-					if(p.pdgId() == 50000){
-						std::cout << p.pdgId() << std::endl;
-					}
-				}*/
-
 				// pTmiss
 				FourMomentum pTmiss;
 				foreach (const Particle& p, applyProjection<VisibleFinalState>(event, "vfs").particles() ) {
 					pTmiss -= p.momentum();
 				}
 				double ETmiss = pTmiss.pT();
-				// require eTmiss > 20
+				// require eTmiss > 150
 				//if (ETmiss < 150*GeV) vetoEvent;
 
 				// Calculate and fill missing Et histos
@@ -93,9 +91,10 @@ namespace Rivet {
 				const Jets jets = jetpro.jetsByPt();
 				MSG_DEBUG("Jet multiplicity = " << jets.size());
 				_hist_n_jet->fill(jets.size(), weight);
+
+				_hist_phi_jet->fill(mapAngleMPiToPi(jets[0].momentum().phi()), weight);
 				foreach (const Jet& j, jets) {
 					const FourMomentum& pj = j.momentum();
-					_hist_phi_jet->fill(mapAngleMPiToPi(pj.phi()), weight);
 					_hist_eta_jet->fill(pj.eta(), weight);
 					_hist_pt_jet->fill(pj.pT()/GeV, weight);
 				}
@@ -108,6 +107,35 @@ namespace Rivet {
 					}
 				}
 
+				Particles chg_tracks = apply<ChargedFinalState>(event, "cfs").particles();
+				// TODO combine jet isolation and track-matching in one loop and muons?
+				Particles cand_e = apply<IdentifiedFinalState>(event, "elecs").particlesByPt();
+				Particles recon_leptons;
+				foreach (const Particle &e, cand_e){
+					// track isolation:
+					double pTinCone = -e.pT();
+					foreach (const Particle &track, chg_tracks ){
+						if ( deltaR(e.momentum(), track.momentum()) < 0.2 )
+							pTinCone += track.pT();
+					}
+					if (pTinCone < 0.1*e.perp() )
+						recon_leptons.push_back(e);
+				}
+
+				// Reconstructed Muons
+				Particles cand_mu = apply<IdentifiedFinalState>(event,"muons").particlesByPt();
+				foreach ( const Particle & mu, cand_mu ) {
+					// isolation
+					double pTinCone = -mu.pT();
+					foreach ( const Particle & track, chg_tracks ) {
+						if ( deltaR(mu.momentum(),track.momentum()) < 0.2 )
+							pTinCone += track.pT();
+					}
+					if ( pTinCone < 1.8*GeV )
+						recon_leptons.push_back(mu);
+				}
+
+
 				// get the candidate jets
 				Jets cand_jets;
 				foreach ( const Jet& jet, applyProjection<FastJets>(event, "AntiKtJets04").jetsByPt(30.0*GeV) ) {
@@ -115,7 +143,7 @@ namespace Rivet {
 				}
 
 				// find the electrons
-				Particles cand_e;
+				Particles cand_es;
 				foreach( const Particle& e, applyProjection<IdentifiedFinalState>(event, "elecs").particlesByPt()) {
 					// remove any leptons within 0.4 of any candidate jets
 					bool e_near_jet = false;
@@ -127,10 +155,10 @@ namespace Rivet {
 						}
 					}
 					if ( e_near_jet ) continue;
-					cand_e.push_back(e);
+					cand_es.push_back(e);
 				}
 				// find the muons
-				Particles cand_mu;
+				Particles cand_mus;
 				foreach( const Particle& mu, applyProjection<IdentifiedFinalState>(event, "muons").particlesByPt()) {
 					// remove any leptons within 0.4 of any candidate jets
 					bool mu_near_jet = false;
@@ -141,7 +169,7 @@ namespace Rivet {
 						}
 					}
 					if ( mu_near_jet ) continue;
-					cand_mu.push_back(mu);
+					cand_mus.push_back(mu);
 				}
 
 				// discard jets that overlap with electrons
@@ -149,7 +177,7 @@ namespace Rivet {
 				foreach ( const Jet& jet, cand_jets ) {
 					if (jet.abseta() > 2.8 || jet.pT() < 30*GeV) continue;
 					bool away_from_e = true;
-					foreach (const Particle& e, cand_e ) {
+					foreach (const Particle& e, cand_es ) {
 						if ( deltaR(e, jet) < 0.2 ) {
 							away_from_e = false;
 							break;
@@ -173,12 +201,13 @@ namespace Rivet {
 					double mT = 2.*recon_jets[ix].perp()*ETmiss
 						-recon_jets[ix].px()*pTmiss.px()
 						-recon_jets[ix].py()*pTmiss.py();
-					std::cout << mT << " The MT cut" << std::endl;
 					if (mT<100.) continue; //vetoEvent;
 				}
 
 				_hist_ETmiss->fill(ETmiss/GeV, weight);
 				_hist_met->fill(met.vectorEt().mod()/GeV);
+				if (recon_leptons.size() > 0)
+					_hist_pt_lep->fill(recon_leptons[0].pT(), weight);
 			}
 
 			void finalize() {
@@ -187,6 +216,7 @@ namespace Rivet {
 				norm = 1/sumOfWeights();
 				scale(_hist_ETmiss,			norm );
 				scale(_hist_met,				norm );
+				scale(_hist_pt_lep,			norm );
 			}
 
 		private:
@@ -195,7 +225,7 @@ namespace Rivet {
 			//@{
 			Histo1DPtr _hist_n_jet, _hist_phi_jet, _hist_eta_jet, _hist_pt_jet, _hist_dR_x0_j;
 
-			Histo1DPtr _hist_ETmiss, _hist_met;
+			Histo1DPtr _hist_ETmiss, _hist_met, _hist_pt_lep;
 			//@}
 
 	};
