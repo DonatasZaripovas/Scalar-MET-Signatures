@@ -16,7 +16,7 @@ doRivet  = True
 
 # The included example model
 #Models = ["L10_1_kin_mass_SM"]
-Models = ["sm-full"]
+Models = ["sm-full", "L10_1_kin_mass_SM"]
 
 # can produce extra scalars if model allows, i.e. for L10_4 make extraScalars = "x0 x0 x0 x0"
 # if not allowed leave blank, i.e. extraScalars = ""
@@ -53,37 +53,59 @@ if doMG5[0]:
 	_shower			  = doMG5[2]
 
   
-	# Begin model run #########################
+	# Write out run card for madgraph #########################
 	for model in Models:
-		MG5Script.write("import model " + model    + "\n" \
+		outFileName = "PROC_" + model + doMG5[1]
+		if doMatching:
+			outFileName += "_Match"
+		else:
+			outFileName += "_noMatch"
+
+		MG5Script.write(
+										"import model " + model    + "\n" \
 										"generate p p > t t~ "        + extraScalars + " " + _finalState + "@0\n" \
+										)
+		if doMatching:
+			MG5Script.write(
 										"add process p p > t t~ j "   + extraScalars + " " + _finalState + "@1\n" \
 										"add process p p > t t~ j j " + extraScalars + " " + _finalState + "@2\n" \
-										"output PROC_" + model    + "\n" \
-									  "launch PROC_" + model    + "\n" \
-										"shower="    + _shower  + "\n" \
-										"0\n")
+										)
+		MG5Script.write(
+										"output " + outFileName    + "\n" \
+									  "launch " + outFileName    + "\n" \
+										"shower=" + _shower				+ "\n" \
+										"0\n" \
+										)
 		# add parameters for jet matching if requested 
 		if doMatching:
 			MG5Script.write("set ickkw 1\n" \
 										  "set maxjetflavor 5\n" \
-											"set ktdurham 1\n")
+											"set ktdurham 1\n" \
+											)
 		# pythia card and no systematics
-		MG5Script.write("set use_syst False\n" \
+		MG5Script.write(
+										"set use_syst False\n" \
 										+MG5Path+"/Pythia8_cards/pythia8_card.dat\n" \
-										"0\n")
+										"0\n" \
+										)
 		MG5Script.close()
-		#os.system("mg5 mg5runscript.mg5")
-		#os.chdir(MG5Path + "/PROC_" + model + "/Events/run_01")
+		os.system("mg5 mg5runscript.mg5")
+		os.chdir(MG5Path + "/" + outFileName + "/Events/run_01")
 		print GREEN+"..Extracting Pythia output..."+ENDC
-		#os.system("gunzip -k tag_1_pythia8_events.hepmc.gz")
+		os.system("gunzip -k tag_1_pythia8_events.hepmc.gz")
 
 if doRivet:
 	print GREEN+"..Running Rivet Analysis..."+ENDC
+	try:
+		outFileName
+	except NameError:
+		outFileName = "PROC_" + model + doMG5[1]
+		if doMatching:
+			outFileName += "_match"
+
 	os.chdir(rivetPath)
-	# os.system("export RIVET_ANALYSIS_PATH=$PWD")
 	os.system("rivet-buildplugin Rivet_Missing_momentum.so Missing_momentum.cc")
 	for model in Models:
-		os.system("rivet --analysis=Missing_momentum "+MG5Path+"/PROC_"+model+"/Events/run_01/tag_1_pythia8_events.hepmc -o PROC_"+model+".yoda")
+		extension = model
+		os.system("rivet --analysis=Missing_momentum "+MG5Path+"/"+outFileName+"/Events/run_01/tag_1_pythia8_events.hepmc -o "+outFileName+".yoda")
 	print "Now run rivet-mkhtml <file1.yoda>:'Name this file' <file2.yoda>:'Name the second file'  etc..."
-	os.system("cd "+rivetPath)
