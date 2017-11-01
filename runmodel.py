@@ -10,7 +10,7 @@ ENDC  = '\033[0m'
 # Options:
 #					top-decay: "Hadronic", "Semileptonic", "Leptonic", "".
 #					shower	 : "Pythia8" , "OFF".
-doMG5    = [ False, "Semileptonic", "Pythia8" ]
+doMG5    = [ True, "Semileptonic", "Pythia8" ]
 doRivet  = True
 
 # Change as appropriate
@@ -22,7 +22,8 @@ if not os.path.exists(MG5Path):
     os.makedirs(MG5Path)
 
 # The included example model
-Models = ["L10_1_kin_mass_SM"]
+#Models = ["L10_1_kin_mass_SM"]
+Models = ["sm-full"]
 
 if doMG5[0]:
 	print GREEN+" ..Running MadGraph ..."+ENDC
@@ -52,12 +53,17 @@ if doMG5[0]:
 			_process = "x0"
 		elif ("L1" in model) or ("L2" in model):
 			_process = "x0 x0"
+		# otherwise don't generate any new scalars. TODO: maybe revise naming convention
+		else:
+			_process = ""
 
-		MG5Script.write("import model " + model    + '\n' \
-										"generate p p > t t~ "    + _process + " " + _finalState + '\n' \
-										"output PROC_" + model    + '\n' \
-									  "launch PROC_" + model    + '\n' \
-										"shower="    + _shower  + '\n' \
+		MG5Script.write("import model " + model    + "\n" \
+										"generate p p > t t~ "        + _process + " " + _finalState + "@0\n" \
+										"add process p p > t t~ j "   + _process + " " + _finalState + "@1\n" \
+										"add process p p > t t~ j j " + _process + " " + _finalState + "@2\n" \
+										"output PROC_" + model    + "\n" \
+									  "launch PROC_" + model    + "\n" \
+										"shower="    + _shower  + "\n" \
 										"0\n" \
 										"set ickkw 1\n" \
 										"set maxjetflavor 5\n" \
@@ -79,3 +85,4 @@ if doRivet:
 	for model in Models:
 		os.system("rivet --analysis=Missing_momentum "+MG5Path+"/PROC_"+model+"/Events/run_01/tag_1_pythia8_events.hepmc -o PROC_"+model+".yoda")
 	print "Now run rivet-mkhtml <file1.yoda>:'Name this file' <file2.yoda>:'Name the second file'  etc..."
+	os.system("cd "+rivetPath)
